@@ -1,0 +1,17 @@
+@media (max-width: 768px) {
+  .mouse-light {
+    display: none;
+  }
+
+  .mobile-stack {
+    grid-template-columns: 1fr;
+  }
+
+  .copy-machine-visual {
+    right: -15rem;
+    top: 16%;
+    width: 42rem;
+    min-width: 42rem;
+    opacity: 0.42;
+  }
+}

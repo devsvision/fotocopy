@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#020617">
+    <title>Jual Mesin Fotocopy Bali | Service Fotocopy Denpasar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              graphite: "#020617",
+              metal: "#64748b",
+              primary: "#00d4ff",
+              electric: "#2563eb",
+              dark: "#020617"
+            },
+            boxShadow: {
+              glow: "0 0 40px rgba(0,212,255,0.35)",
+              metal: "inset 0 1px 0 rgba(255,255,255,0.18), 0 24px 80px rgba(0,0,0,0.35)"
+            },
+            backdropBlur: {
+              xs: "2px"
+            },
+            screens: {
+              xs: "420px"
+            }
+          }
+        }
+      };
+    </script>
+    <link rel="preconnect" href="https://images.unsplash.com">
+    <link rel="stylesheet" href="styles/global.css">
+    <link rel="stylesheet" href="styles/glassmorphism.css">
+    <link rel="stylesheet" href="styles/animations.css">
+    <link rel="stylesheet" href="styles/responsive.css">
+  </head>
+  <body class="bg-dark text-white antialiased">
+    <div id="loader" class="fixed inset-0 z-50 grid place-items-center bg-slate-950">
+      <div class="text-center">
+        <div class="loader-ring mx-auto"></div>
+        <p class="mt-5 text-xs font-bold uppercase tracking-[0.28em] text-cyan-200">Loading CopyTech</p>
+      </div>
+    </div>
+    <div class="mouse-light"></div>
+    <div id="app"></div>
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

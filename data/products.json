@@ -1,0 +1,68 @@
+[
+  {
+    "id": "p001",
+    "name": "Canon iR ADV 4525",
+    "category": "fotocopy",
+    "description": "Mesin fotocopy rekondisi premium untuk kantor dan usaha fotocopy volume menengah.",
+    "specs": ["A3 monochrome", "25 ppm", "Duplex + ADF", "Network print & scan"],
+    "price": "Mulai Rp 28.500.000",
+    "stock": "Ready Stock",
+    "featured": true,
+    "image": "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "p002",
+    "name": "Fuji Xerox ApeosPort V 3065",
+    "category": "fotocopy",
+    "description": "Unit cepat untuk kebutuhan copy center, sekolah, dan kampus dengan kualitas cetak stabil.",
+    "specs": ["A3 monochrome", "65 ppm", "Feeder cepat", "Rekondisi bergaransi"],
+    "price": "Mulai Rp 45.000.000",
+    "stock": "Pre Order",
+    "featured": true,
+    "image": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "p003",
+    "name": "Mesin Laminating Roll A3",
+    "category": "laminating",
+    "description": "Mesin laminating roll untuk finishing dokumen, kartu, poster kecil, dan menu usaha.",
+    "specs": ["Lebar A3", "Hot roll", "Speed adjustable", "Body metal"],
+    "price": "Rp 3.750.000",
+    "stock": "Ready Stock",
+    "featured": true,
+    "image": "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "p004",
+    "name": "Mesin Press Kaos 38x38",
+    "category": "press",
+    "description": "Heat press digital untuk usaha sablon kaos satuan, merchandise, dan custom gift.",
+    "specs": ["Area 38x38 cm", "Digital timer", "Temperature control", "Pressure knob"],
+    "price": "Rp 2.900.000",
+    "stock": "Ready Stock",
+    "featured": true,
+    "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "p005",
+    "name": "Mesin Press Mug Digital",
+    "category": "press",
+    "description": "Paket press mug untuk usaha souvenir dan merchandise printing.",
+    "specs": ["Digital display", "Elemen 11 oz", "Timer otomatis", "Training penggunaan"],
+    "price": "Rp 1.850.000",
+    "stock": "Ready Stock",
+    "featured": false,
+    "image": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "p006",
+    "name": "Paket Usaha Fotocopy Starter",
+    "category": "package",
+    "description": "Paket awal usaha fotocopy untuk lokasi kos, sekolah, desa, dan area kampus.",
+    "specs": ["1 mesin fotocopy A3", "Printer warna", "Laminating A3", "Toner awal + training"],
+    "price": "Mulai Rp 39.000.000",
+    "stock": "Konsultasi",
+    "featured": true,
+    "image": "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=900&q=80"
+  }
+]

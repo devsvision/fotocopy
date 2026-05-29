@@ -1,0 +1,11 @@
+[
+  { "id": "fotocopy", "name": "Mesin Fotocopy", "icon": "printer", "description": "Canon, Fuji Xerox, Kyocera, Ricoh untuk volume kerja harian.", "image": "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=900&q=80" },
+  { "id": "laminating", "name": "Mesin Laminating", "icon": "layers", "description": "Laminating panas, dingin, dan roll untuk finishing dokumen.", "image": "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=900&q=80" },
+  { "id": "press", "name": "Mesin Press", "icon": "flame", "description": "Press kaos, mug, kartu, dan pin untuk diversifikasi usaha.", "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80" },
+  { "id": "cutting", "name": "Mesin Potong Kertas", "icon": "scissors", "description": "Paper cutter manual dan elektrik untuk operasional cepat.", "image": "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=900&q=80" },
+  { "id": "binding", "name": "Mesin Jilid", "icon": "book", "description": "Spiral, lem panas, dan thermal binding untuk layanan dokumen.", "image": "https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=900&q=80" },
+  { "id": "printer", "name": "Printer & Scanner", "icon": "scan", "description": "Printer inkjet, laser, scanner, dan paket kantor.", "image": "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=900&q=80" },
+  { "id": "toner", "name": "Tinta & Toner", "icon": "droplets", "description": "Toner, tinta, drum, developer, dan consumable original/compatible.", "image": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80" },
+  { "id": "sparepart", "name": "Sparepart Fotocopy", "icon": "cpu", "description": "Roller, fuser, blade, drum, gear, dan komponen fast moving.", "image": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80" },
+  { "id": "package", "name": "Paket Usaha Lengkap", "icon": "briefcase", "description": "Bundling mesin, perlengkapan, instalasi, training, dan support.", "image": "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=900&q=80" }
+]

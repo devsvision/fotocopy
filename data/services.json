@@ -1,0 +1,7 @@
+[
+  { "id": "s001", "title": "Penjualan Mesin Fotocopy", "description": "Unit rekondisi pilihan, instalasi, training operator, dan garansi teknisi Bali.", "icon": "shopping-bag" },
+  { "id": "s002", "title": "Service Onsite Denpasar & Bali", "description": "Teknisi datang ke lokasi untuk perbaikan error, hasil buram, paper jam, dan maintenance.", "icon": "wrench" },
+  { "id": "s003", "title": "Sewa Mesin Fotocopy", "description": "Solusi sewa bulanan untuk kantor, sekolah, proyek, dan event dengan support berkala.", "icon": "repeat" },
+  { "id": "s004", "title": "Sparepart & Consumable", "description": "Toner, drum, fuser, roller, developer, blade, dan sparepart fast moving.", "icon": "package" },
+  { "id": "s005", "title": "Konsultasi Usaha Printing", "description": "Bantu hitung kebutuhan mesin, modal awal, layout toko, dan paket yang paling masuk akal.", "icon": "messages-square" }
+]
