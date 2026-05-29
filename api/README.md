@@ -1,13 +1,22 @@
-# API Placeholder
+# API PHP Native Modular
 
-Folder ini disiapkan untuk backend produksi. Versi saat ini adalah website static dengan dashboard admin berbasis `localStorage`.
+Endpoint produksi ringan untuk Hostinger shared hosting.
 
-Untuk produksi, endpoint PHP di folder ini bisa dihubungkan ke MySQL atau file JSON server-side:
+## Core
 
-- `auth.php`
-- `upload-image.php`
-- `save-product.php`
-- `save-category.php`
-- `save-service.php`
-- `save-gallery.php`
-- `save-settings.php`
+- `core/bootstrap.php` - session aman, timezone, loader database/response.
+- `core/database.php` - koneksi PDO MySQL.
+- `core/response.php` - JSON response dan parser request.
+- `middleware/auth.php` - session auth, role middleware, validasi akses toko.
+
+## Endpoint
+
+- `auth.php?action=login|logout|me`
+- `products.php`
+- `categories.php`
+- `transactions.php`
+- `inventory.php`
+- `reports.php`
+- `crud.php?resource=products|categories|services|stores|users|testimonials|gallery|faqs|settings`
+
+Endpoint lama `save-*.php` masih ada sebagai kompatibilitas placeholder. Untuk produksi baru, gunakan endpoint modular di atas.

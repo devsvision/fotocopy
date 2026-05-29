@@ -66,14 +66,28 @@ let state = {
 boot();
 
 async function boot() {
-  guard();
+  if (!(await guard())) return;
   state.data = await loadAdminData();
   render();
 }
 
-function guard() {
+async function guard() {
   const session = JSON.parse(localStorage.getItem("bct_admin_session") || "null");
-  if (!session?.loggedIn) window.location.href = getLoginPath();
+  if (session?.loggedIn) return true;
+
+  try {
+    const response = await fetch("../api/auth.php?action=me");
+    const result = await response.json();
+    if (result.user) {
+      localStorage.setItem("bct_admin_session", JSON.stringify({ loggedIn: true, user: result.user, at: Date.now() }));
+      return true;
+    }
+  } catch (error) {
+    // Static preview servers do not execute PHP; keep the existing local login flow.
+  }
+
+  window.location.href = getLoginPath();
+  return false;
 }
 
 async function loadAdminData({ forceSeed = false } = {}) {

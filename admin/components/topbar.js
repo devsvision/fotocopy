@@ -7,6 +7,7 @@ export function topbar(title) {
       </div>
       <div class="flex flex-wrap gap-2">
         <a href="../index.html" target="_blank" class="rounded-full border border-white/10 px-4 py-2 text-sm font-bold text-slate-200 hover:bg-white/10">Buka Website</a>
+        <a href="../kasir/" class="rounded-full border border-white/10 px-4 py-2 text-sm font-bold text-slate-200 hover:bg-white/10">POS Kasir</a>
         <button id="export-data-top" class="rounded-full border border-cyan-300/30 px-4 py-2 text-sm font-bold text-cyan-200 hover:bg-cyan-300/10">Export JSON</button>
         <button id="logout" class="rounded-full bg-white px-4 py-2 text-sm font-black text-slate-950">Logout</button>
       </div>

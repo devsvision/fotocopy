@@ -66,6 +66,26 @@ project-root/
 │   │   └── analytics.js
 │   │
 │   └── components/
+│
+├── dashboard/
+│   └── index.php
+│
+├── kasir/
+│   ├── index.php
+│   ├── pos.css
+│   └── pos.js
+│
+├── auth/
+│   ├── login.php
+│   └── login.js
+│
+├── config/
+│   ├── app.php
+│   └── database.php
+│
+├── database/
+│   ├── schema.sql
+│   └── seed.sql
 │       ├── sidebar.js
 │       ├── topbar.js
 │       ├── stat-card.js

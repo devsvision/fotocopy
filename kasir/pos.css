@@ -1,0 +1,93 @@
+.pos-shell {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(0, 212, 255, 0.18), transparent 32rem),
+    radial-gradient(circle at 80% 0%, rgba(37, 99, 235, 0.16), transparent 28rem);
+}
+
+.pos-input {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.8rem 1rem;
+  color: white;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.pos-input:focus {
+  border-color: rgba(103, 232, 249, 0.8);
+  box-shadow: 0 0 0 3px rgba(103, 232, 249, 0.14);
+}
+
+.pos-button {
+  border-radius: 999px;
+  background: #67e8f9;
+  padding: 0.85rem 1.25rem;
+  font-weight: 900;
+  color: #020617;
+  box-shadow: 0 0 32px rgba(0, 212, 255, 0.28);
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.pos-button:hover {
+  background: white;
+  transform: translateY(-1px);
+}
+
+.pos-button.secondary {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  box-shadow: none;
+}
+
+.pos-icon-button {
+  display: grid;
+  height: 2.5rem;
+  width: 2.5rem;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.product-card {
+  min-height: 12rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  padding: 1rem;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(103, 232, 249, 0.5);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.3);
+}
+
+.cart-scroll {
+  max-height: min(42vh, 28rem);
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+@media print {
+  body > :not(.receipt) {
+    display: none !important;
+  }
+
+  .receipt {
+    display: block !important;
+    color: #111;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.35;
+    width: 72mm;
+    padding: 8px;
+  }
+}
