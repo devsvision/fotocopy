@@ -22,7 +22,6 @@ export function navbar({ company, settings }) {
       <button id="menu-toggle" class="rounded-xl border border-white/10 p-3 text-white md:hidden" aria-label="Buka menu">☰</button>
       <div id="nav-menu" class="glass-soft pointer-events-none absolute left-4 right-4 top-24 grid translate-y-2 gap-2 rounded-2xl p-3 opacity-0 transition md:pointer-events-auto md:static md:flex md:translate-y-0 md:items-center md:gap-1 md:rounded-none md:border-0 md:bg-transparent md:p-0 md:opacity-100 md:backdrop-blur-0">
         ${links.map(([label, href]) => `<a class="rounded-full px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white" href="${href}">${label}</a>`).join("")}
-        <a href="dashboard/login.html" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white">Admin</a>
         <a href="${whatsappUrl(company, settings.whatsappMessage)}" target="_blank" rel="noopener" class="rounded-full bg-cyan-300 px-5 py-2.5 text-sm font-black text-slate-950 shadow-glow transition hover:bg-white">WhatsApp</a>
       </div>
     </nav>

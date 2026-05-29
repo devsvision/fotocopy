@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin | Bali CopyTech</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/glassmorphism.css">
+    <link rel="stylesheet" href="../styles/animations.css">
+    <link rel="stylesheet" href="../styles/dashboard-theme.css">
+  </head>
+  <body class="admin-shell grid min-h-screen place-items-center px-4 text-white">
+    <main class="glass w-full max-w-md rounded-3xl p-8">
+      <p class="text-xs font-bold uppercase tracking-[0.28em] text-cyan-200">Admin Panel</p>
+      <h1 class="mt-3 text-3xl font-black">Bali CopyTech</h1>
+      <p class="mt-3 text-sm leading-7 text-slate-300">Masuk untuk mengelola produk, layanan, gallery, testimonial, FAQ, dan pengaturan website.</p>
+      <form id="login-form" class="mt-8 space-y-4">
+        <label class="block">
+          <span class="text-sm font-bold text-slate-200">Username</span>
+          <input name="username" value="admin" class="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-cyan-300">
+        </label>
+        <label class="block">
+          <span class="text-sm font-bold text-slate-200">Password</span>
+          <input name="password" type="password" value="admin123" class="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-cyan-300">
+        </label>
+        <p id="login-error" class="hidden rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">Username atau password salah.</p>
+        <button class="w-full rounded-full bg-cyan-300 px-5 py-3 text-sm font-black text-slate-950 shadow-glow transition hover:bg-white">Masuk Dashboard</button>
+      </form>
+      <p class="mt-6 text-xs text-slate-500">Demo: admin / admin123</p>
+    </main>
+    <script type="module" src="../dashboard/js/auth.js"></script>
+  </body>
+</html>

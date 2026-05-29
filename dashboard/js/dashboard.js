@@ -73,7 +73,7 @@ async function boot() {
 
 function guard() {
   const session = JSON.parse(localStorage.getItem("bct_admin_session") || "null");
-  if (!session?.loggedIn) window.location.href = "login.html";
+  if (!session?.loggedIn) window.location.href = getLoginPath();
 }
 
 async function loadAdminData({ forceSeed = false } = {}) {
@@ -299,7 +299,7 @@ function bindEvents() {
 
   document.querySelector("#logout")?.addEventListener("click", () => {
     localStorage.removeItem("bct_admin_session");
-    window.location.href = "login.html";
+    window.location.href = getLoginPath();
   });
 
   document.querySelector("#export-data")?.addEventListener("click", exportData);
@@ -512,6 +512,10 @@ function toast(message) {
   element.textContent = message;
   element.classList.remove("opacity-0", "translate-y-4");
   window.setTimeout(() => element.classList.add("opacity-0", "translate-y-4"), 1800);
+}
+
+function getLoginPath() {
+  return window.location.pathname.includes("/admin/") ? "./" : "login.html";
 }
 
 function label(field) {
