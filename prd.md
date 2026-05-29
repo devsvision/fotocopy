@@ -46,8 +46,8 @@ project-root/
 │   ├── footer.js
 │   └── dashboard-loader.js
 │
-├── dashboard/
-│   ├── login.html
+├── admin/
+│   ├── index.html
 │   ├── dashboard.html
 │   │
 │   ├── css/

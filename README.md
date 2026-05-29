@@ -15,7 +15,7 @@ Website company profile modern untuk penjualan mesin fotocopy, service, sewa, sp
 1. Buka folder project ini di VS Code.
 2. Install extension **Live Server**.
 3. Klik kanan `index.html`, lalu pilih **Open with Live Server**.
-4. Buka dashboard admin di `/dashboard/login.html`.
+4. Buka dashboard admin di `/admin/`.
 
 Login demo:
 
@@ -32,7 +32,7 @@ Catatan: karena menggunakan `fetch()` untuk membaca file JSON, jalankan lewat lo
 - `main.js` - entry point yang memuat semua module.
 - `modules/` - section website reusable.
 - `data/` - sample JSON company, produk, kategori, layanan, gallery, testimonial, FAQ, settings.
-- `dashboard/` - login dan admin panel.
+- `admin/` - login dan admin panel.
 - `styles/` - global UI, glassmorphism, animasi, responsive.
 - `utils/` - helper fetch, SEO, WhatsApp, animasi.
 - `api/` - placeholder endpoint PHP untuk pengembangan backend.
