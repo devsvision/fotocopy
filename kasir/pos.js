@@ -1,305 +1,139 @@
-const body = document.body;
-const storeId = Number(body.dataset.storeId || 1);
-const cashierName = body.dataset.cashier || "Kasir";
-const storeName = body.dataset.store || "Bali CopyTech";
+import { createTransaction, demoProductCategories, listProducts } from "../services/dataService.js";
+import { debounce } from "../utils/dom.js";
+import { escapeHtml, rupiah } from "../utils/format.js";
 
-const state = {
-  products: [],
-  categories: [],
-  cart: [],
-  categoryId: 0,
-  query: ""
-};
+const app = document.querySelector("#kasir-app");
+const receipt = document.querySelector("#receipt");
+const state = { products: [], cart: [], query: "", category: "Semua" };
 
-const currency = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
-
-const els = {
-  search: document.querySelector("#product-search"),
-  reload: document.querySelector("#reload-products"),
-  categoryTabs: document.querySelector("#category-tabs"),
-  productGrid: document.querySelector("#product-grid"),
-  cartItems: document.querySelector("#cart-items"),
-  clearCart: document.querySelector("#clear-cart"),
-  discount: document.querySelector("#discount-total"),
-  tax: document.querySelector("#tax-total"),
-  paid: document.querySelector("#paid-amount"),
-  method: document.querySelector("#payment-method"),
-  subtotal: document.querySelector("#subtotal"),
-  discountView: document.querySelector("#discount-view"),
-  taxView: document.querySelector("#tax-view"),
-  grandTotal: document.querySelector("#grand-total"),
-  change: document.querySelector("#change-amount"),
-  pay: document.querySelector("#pay-button"),
-  message: document.querySelector("#pos-message"),
-  receipt: document.querySelector("#receipt")
-};
-
-boot();
-
-async function boot() {
-  bind();
-  await Promise.all([loadCategories(), loadProducts()]);
-  render();
-}
-
-function bind() {
-  els.search.addEventListener("input", debounce((event) => {
-    state.query = event.target.value.trim();
-    loadProducts();
-  }, 260));
-  els.reload.addEventListener("click", loadProducts);
-  els.clearCart.addEventListener("click", () => {
-    state.cart = [];
-    renderCart();
-  });
-  [els.discount, els.tax, els.paid].forEach((input) => input.addEventListener("input", renderTotals));
-  els.pay.addEventListener("click", submitTransaction);
-}
-
-async function loadCategories() {
-  try {
-    const result = await api(`../api/categories.php?store_id=${storeId}`);
-    state.categories = result.categories || [];
-  } catch (error) {
-    notify(error.message, "error");
-  }
-}
+await loadProducts();
+render();
 
 async function loadProducts() {
-  const params = new URLSearchParams({ store_id: storeId, q: state.query });
-  if (state.categoryId) params.set("category_id", state.categoryId);
-  try {
-    const result = await api(`../api/products.php?${params}`);
-    state.products = result.products || [];
-    renderProducts();
-  } catch (error) {
-    notify(error.message, "error");
-  }
+  state.products = await listProducts({ query: state.query, category: state.category === "Semua" ? "" : state.category });
 }
 
 function render() {
-  renderCategories();
-  renderProducts();
-  renderCart();
-}
-
-function renderCategories() {
-  const tabs = [{ id: 0, name: "Semua" }, ...state.categories];
-  els.categoryTabs.innerHTML = tabs.map((category) => `
-    <button class="category-tab shrink-0 rounded-full px-4 py-2 text-sm font-bold transition ${state.categoryId === Number(category.id) ? "bg-cyan-300 text-slate-950" : "bg-white/5 text-slate-200 hover:bg-white/10"}" data-id="${category.id}">
-      ${escapeHtml(category.name)}
-    </button>
-  `).join("");
-  els.categoryTabs.querySelectorAll(".category-tab").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.categoryId = Number(button.dataset.id);
-      renderCategories();
-      loadProducts();
-    });
-  });
-}
-
-function renderProducts() {
-  if (!state.products.length) {
-    els.productGrid.innerHTML = `<div class="rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-slate-300">Produk tidak ditemukan.</div>`;
-    return;
-  }
-
-  els.productGrid.innerHTML = state.products.map((product) => `
-    <button class="product-card text-left" data-id="${product.id}">
-      <div class="flex min-h-16 items-start justify-between gap-3">
+  app.innerHTML = `<main class="grid min-h-screen gap-4 p-3 lg:grid-cols-[1fr_430px] lg:p-5">
+    <section class="glass rounded-3xl p-4">
+      <header class="flex flex-col gap-4 border-b border-white/10 pb-4 xl:flex-row xl:items-center xl:justify-between">
         <div>
-          <p class="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">${escapeHtml(product.category_name || "Produk")}</p>
-          <h3 class="mt-2 text-base font-black text-white">${escapeHtml(product.name)}</h3>
+          <p class="text-xs font-black uppercase tracking-[0.28em] text-cyan-200">POS Kasir</p>
+          <h1 class="mt-2 text-2xl font-black">Transaksi Multi Toko</h1>
         </div>
-        <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-slate-200">${Number(product.stock)} ${escapeHtml(product.unit || "pcs")}</span>
+        <input id="search" class="field max-w-xl" placeholder="Scan barcode / cari produk">
+      </header>
+      <div id="categories" class="mt-4 flex gap-2 overflow-x-auto pb-2">${categoryButtons()}</div>
+      <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">${productCards()}</div>
+    </section>
+    <aside class="glass rounded-3xl p-4">
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div><p class="text-xs font-black uppercase tracking-[0.24em] text-cyan-200">Cart</p><h2 class="text-xl font-black">Pembayaran</h2></div>
+        <button id="clear" class="btn-secondary px-4 py-2">Clear</button>
       </div>
-      <p class="mt-4 text-xl font-black text-cyan-100">${currency.format(Number(product.selling_price || 0))}</p>
-      <p class="mt-2 text-xs text-slate-400">${escapeHtml(product.sku || "-")} ${product.barcode ? " / " + escapeHtml(product.barcode) : ""}</p>
-    </button>
-  `).join("");
-  els.productGrid.querySelectorAll(".product-card").forEach((button) => {
-    button.addEventListener("click", () => addToCart(Number(button.dataset.id)));
-  });
-}
-
-function addToCart(productId) {
-  const product = state.products.find((item) => Number(item.id) === productId);
-  if (!product) return;
-
-  const existing = state.cart.find((item) => Number(item.product_id) === productId);
-  if (existing) existing.qty += 1;
-  else state.cart.push({
-    product_id: Number(product.id),
-    name: product.name,
-    sku: product.sku,
-    price: Number(product.selling_price || 0),
-    qty: 1,
-    stock: Number(product.stock || 0)
-  });
-
-  renderCart();
-}
-
-function renderCart() {
-  if (!state.cart.length) {
-    els.cartItems.innerHTML = `<div class="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-slate-400">Cart kosong. Pilih produk atau scan barcode.</div>`;
-    renderTotals();
-    return;
-  }
-
-  els.cartItems.innerHTML = state.cart.map((item) => `
-    <article class="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <h3 class="font-black">${escapeHtml(item.name)}</h3>
-          <p class="mt-1 text-xs text-slate-400">${escapeHtml(item.sku || "")}</p>
-        </div>
-        <button class="remove-item pos-icon-button h-8 w-8 text-sm" data-id="${item.product_id}">×</button>
+      <div id="cart" class="mt-4 max-h-[42vh] space-y-3 overflow-auto">${cartItems()}</div>
+      <div class="mt-4 space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+        <input id="discount" class="field" type="number" min="0" value="0" placeholder="Diskon">
+        <input id="paid" class="field" type="number" min="0" value="${total()}" placeholder="Dibayar">
+        <select id="payment" class="field"><option value="cash">Cash</option><option value="transfer">Transfer</option><option value="qris">QRIS</option></select>
       </div>
-      <div class="mt-3 grid grid-cols-[auto_1fr_auto] items-center gap-2">
-        <button class="qty-minus pos-icon-button h-9 w-9 text-sm" data-id="${item.product_id}">-</button>
-        <input class="qty-input pos-input py-2 text-center" data-id="${item.product_id}" type="number" min="1" max="${item.stock}" value="${item.qty}">
-        <button class="qty-plus pos-icon-button h-9 w-9 text-sm" data-id="${item.product_id}">+</button>
-      </div>
-      <div class="mt-3 flex justify-between text-sm text-slate-200">
-        <span>${currency.format(item.price)}</span>
-        <strong>${currency.format(item.price * item.qty)}</strong>
-      </div>
-    </article>
-  `).join("");
-
-  els.cartItems.querySelectorAll(".remove-item").forEach((button) => button.addEventListener("click", () => removeItem(Number(button.dataset.id))));
-  els.cartItems.querySelectorAll(".qty-minus").forEach((button) => button.addEventListener("click", () => changeQty(Number(button.dataset.id), -1)));
-  els.cartItems.querySelectorAll(".qty-plus").forEach((button) => button.addEventListener("click", () => changeQty(Number(button.dataset.id), 1)));
-  els.cartItems.querySelectorAll(".qty-input").forEach((input) => input.addEventListener("input", () => setQty(Number(input.dataset.id), Number(input.value || 1))));
-  renderTotals();
+      <div id="totals" class="mt-4">${totalsView()}</div>
+      <button id="pay" class="btn-primary mt-5 w-full">Simpan & Print Receipt</button>
+    </aside>
+  </main>`;
+  bind();
 }
 
-function removeItem(productId) {
-  state.cart = state.cart.filter((item) => item.product_id !== productId);
-  renderCart();
+function categoryButtons() {
+  return demoProductCategories().map((category) => `<button data-category="${category}" class="category shrink-0 rounded-full px-4 py-2 text-sm font-bold ${state.category === category ? "bg-cyan-300 text-slate-950" : "bg-white/5 text-slate-200"}">${category}</button>`).join("");
 }
 
-function changeQty(productId, delta) {
-  const item = state.cart.find((entry) => entry.product_id === productId);
-  if (!item) return;
-  item.qty = Math.max(1, Math.min(item.stock, item.qty + delta));
-  renderCart();
+function productCards() {
+  return state.products.map((product) => `<button data-id="${product.id}" class="product glass glow-hover rounded-3xl p-5 text-left">
+    <p class="text-xs font-bold uppercase tracking-[0.2em] text-cyan-200">${escapeHtml(product.category)}</p>
+    <h3 class="mt-3 text-lg font-black">${escapeHtml(product.name)}</h3>
+    <p class="mt-3 text-2xl font-black text-cyan-100">${rupiah.format(product.price)}</p>
+    <p class="mt-2 text-xs text-slate-400">Stok ${product.stock} · ${escapeHtml(product.sku)}</p>
+  </button>`).join("");
 }
 
-function setQty(productId, qty) {
-  const item = state.cart.find((entry) => entry.product_id === productId);
-  if (!item) return;
-  item.qty = Math.max(1, Math.min(item.stock, qty));
-  renderTotals();
+function cartItems() {
+  if (!state.cart.length) return `<p class="rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-sm text-slate-400">Cart kosong.</p>`;
+  return state.cart.map((item) => `<article class="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+    <div class="flex justify-between gap-3"><strong>${escapeHtml(item.name)}</strong><button data-id="${item.id}" class="remove text-cyan-200">Hapus</button></div>
+    <div class="mt-3 flex items-center gap-2"><button data-id="${item.id}" class="minus btn-secondary px-3 py-1">-</button><span class="font-black">${item.qty}</span><button data-id="${item.id}" class="plus btn-secondary px-3 py-1">+</button><strong class="ml-auto">${rupiah.format(item.qty * item.price)}</strong></div>
+  </article>`).join("");
 }
 
-function totals() {
-  const subtotal = state.cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const discount = Number(els.discount.value || 0);
-  const tax = Number(els.tax.value || 0);
-  const grandTotal = Math.max(0, subtotal - discount + tax);
-  const paid = Number(els.paid.value || 0);
-  return { subtotal, discount, tax, grandTotal, paid, change: Math.max(0, paid - grandTotal) };
-}
-
-function renderTotals() {
-  const value = totals();
-  els.subtotal.textContent = currency.format(value.subtotal);
-  els.discountView.textContent = currency.format(value.discount);
-  els.taxView.textContent = currency.format(value.tax);
-  els.grandTotal.textContent = currency.format(value.grandTotal);
-  els.change.textContent = currency.format(value.change);
-}
-
-async function submitTransaction() {
-  const value = totals();
-  if (!state.cart.length) return notify("Cart masih kosong.", "error");
-  if (value.paid < value.grandTotal) return notify("Nominal dibayar kurang dari total.", "error");
-
-  try {
-    els.pay.disabled = true;
-    const result = await api("../api/transactions.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        store_id: storeId,
-        items: state.cart.map((item) => ({ product_id: item.product_id, qty: item.qty })),
-        discount_total: value.discount,
-        tax_total: value.tax,
-        paid_amount: value.paid,
-        payment_method: els.method.value
-      })
-    });
-    renderReceipt(result.transaction, value);
-    window.print();
-    state.cart = [];
-    els.paid.value = 0;
+function bind() {
+  document.querySelector("#search").addEventListener("input", debounce(async (event) => {
+    state.query = event.target.value;
     await loadProducts();
-    renderCart();
-    notify("Transaksi tersimpan.", "success");
-  } catch (error) {
-    notify(error.message, "error");
-  } finally {
-    els.pay.disabled = false;
-  }
+    render();
+  }));
+  document.querySelectorAll(".category").forEach((button) => button.addEventListener("click", async () => {
+    state.category = button.dataset.category;
+    await loadProducts();
+    render();
+  }));
+  document.querySelectorAll(".product").forEach((button) => button.addEventListener("click", () => add(button.dataset.id)));
+  document.querySelectorAll(".plus").forEach((button) => button.addEventListener("click", () => qty(button.dataset.id, 1)));
+  document.querySelectorAll(".minus").forEach((button) => button.addEventListener("click", () => qty(button.dataset.id, -1)));
+  document.querySelectorAll(".remove").forEach((button) => button.addEventListener("click", () => remove(button.dataset.id)));
+  document.querySelector("#clear").addEventListener("click", () => { state.cart = []; render(); });
+  document.querySelector("#discount").addEventListener("input", updateTotals);
+  document.querySelector("#paid").addEventListener("input", updateTotals);
+  document.querySelector("#pay").addEventListener("click", pay);
 }
 
-function renderReceipt(transaction, total) {
-  els.receipt.innerHTML = `
-    <div style="text-align:center">
-      <strong>${escapeHtml(storeName)}</strong><br>
-      Denpasar, Bali<br>
-      ${new Date().toLocaleString("id-ID")}
-    </div>
-    <hr>
-    Invoice: ${escapeHtml(transaction.invoice_number)}<br>
-    Kasir: ${escapeHtml(cashierName)}<br>
-    <hr>
-    ${state.cart.map((item) => `
-      ${escapeHtml(item.name)}<br>
-      ${item.qty} x ${currency.format(item.price)} = ${currency.format(item.qty * item.price)}<br>
-    `).join("")}
-    <hr>
-    Subtotal: ${currency.format(total.subtotal)}<br>
-    Diskon: ${currency.format(total.discount)}<br>
-    Pajak: ${currency.format(total.tax)}<br>
-    <strong>Total: ${currency.format(total.grandTotal)}</strong><br>
-    Bayar: ${currency.format(total.paid)}<br>
-    Kembali: ${currency.format(total.change)}<br>
-    <hr>
-    <div style="text-align:center">Terima kasih</div>
-  `;
+function add(id) {
+  const product = state.products.find((item) => item.id === id);
+  const item = state.cart.find((entry) => entry.id === id);
+  if (item) item.qty += 1;
+  else state.cart.push({ ...product, qty: 1 });
+  render();
 }
 
-async function api(url, options = {}) {
-  const response = await fetch(url, options);
-  const data = await response.json();
-  if (!response.ok || !data.success) throw new Error(data.message || "Request gagal.");
-  return data;
+function qty(id, delta) {
+  const item = state.cart.find((entry) => entry.id === id);
+  if (!item) return;
+  item.qty = Math.max(1, item.qty + delta);
+  render();
 }
 
-function notify(message, type = "success") {
-  els.message.textContent = message;
-  els.message.className = `mt-3 rounded-xl px-4 py-3 text-sm ${type === "error" ? "border border-red-400/30 bg-red-500/10 text-red-200" : "border border-cyan-300/30 bg-cyan-500/10 text-cyan-100"}`;
-  window.setTimeout(() => els.message.classList.add("hidden"), 2800);
+function remove(id) {
+  state.cart = state.cart.filter((item) => item.id !== id);
+  render();
 }
 
-function debounce(fn, delay) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = window.setTimeout(() => fn(...args), delay);
-  };
+function total() {
+  return state.cart.reduce((sum, item) => sum + item.qty * item.price, 0);
 }
 
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, (char) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  })[char]);
+function totalsView() {
+  return `<div class="space-y-2 text-sm">
+    <div class="flex justify-between text-slate-300"><span>Subtotal</span><strong>${rupiah.format(total())}</strong></div>
+    <div class="flex justify-between border-t border-white/10 pt-3 text-lg"><span>Total</span><strong id="grand">${rupiah.format(total())}</strong></div>
+    <div class="flex justify-between text-cyan-200"><span>Kembalian</span><strong id="change">${rupiah.format(0)}</strong></div>
+  </div>`;
+}
+
+function updateTotals() {
+  const discount = Number(document.querySelector("#discount").value || 0);
+  const paid = Number(document.querySelector("#paid").value || 0);
+  const grand = Math.max(0, total() - discount);
+  document.querySelector("#grand").textContent = rupiah.format(grand);
+  document.querySelector("#change").textContent = rupiah.format(Math.max(0, paid - grand));
+}
+
+async function pay() {
+  const discount = Number(document.querySelector("#discount").value || 0);
+  const paid = Number(document.querySelector("#paid").value || 0);
+  const grand = Math.max(0, total() - discount);
+  if (!state.cart.length || paid < grand) return;
+  const trx = await createTransaction({ items: state.cart, discount_total: discount, paid_amount: paid, payment_method: document.querySelector("#payment").value });
+  receipt.innerHTML = `<div style="text-align:center"><strong>Bali CopyTech</strong><br>Denpasar Bali<br>${new Date().toLocaleString("id-ID")}</div><hr>Invoice: ${trx.invoice_number}<hr>${state.cart.map((item) => `${escapeHtml(item.name)}<br>${item.qty} x ${rupiah.format(item.price)} = ${rupiah.format(item.qty * item.price)}<br>`).join("")}<hr>Total: ${rupiah.format(grand)}<br>Bayar: ${rupiah.format(paid)}<br>Kembali: ${rupiah.format(Math.max(0, paid - grand))}<hr><div style="text-align:center">Terima kasih</div>`;
+  window.print();
+  state.cart = [];
+  render();
 }

@@ -1,213 +1,178 @@
-CREATE DATABASE IF NOT EXISTS fotocopy_business
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
+create extension if not exists "pgcrypto";
 
-USE fotocopy_business;
+create table public.roles (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique check (code in ('super_admin', 'owner', 'manager', 'cashier')),
+  name text not null,
+  created_at timestamptz default now()
+);
 
-CREATE TABLE roles (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  code VARCHAR(30) NOT NULL UNIQUE,
-  name VARCHAR(80) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+create table public.stores (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  code text not null unique,
+  address text,
+  phone text,
+  city text default 'Denpasar',
+  province text default 'Bali',
+  is_active boolean default true,
+  created_at timestamptz default now()
+);
 
-CREATE TABLE stores (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(150) NOT NULL,
-  code VARCHAR(30) NOT NULL UNIQUE,
-  phone VARCHAR(30) NULL,
-  address TEXT NULL,
-  city VARCHAR(80) DEFAULT 'Denpasar',
-  province VARCHAR(80) DEFAULT 'Bali',
-  is_active TINYINT(1) DEFAULT 1,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+create table public.users (
+  id uuid primary key default gen_random_uuid(),
+  auth_user_id uuid references auth.users(id) on delete cascade,
+  role_id uuid references public.roles(id),
+  store_id uuid references public.stores(id),
+  name text not null,
+  email text not null unique,
+  phone text,
+  is_active boolean default true,
+  created_at timestamptz default now()
+);
 
-CREATE TABLE users (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  role_id INT UNSIGNED NOT NULL,
-  store_id INT UNSIGNED NULL,
-  name VARCHAR(150) NOT NULL,
-  username VARCHAR(80) NOT NULL UNIQUE,
-  email VARCHAR(150) NULL UNIQUE,
-  password_hash VARCHAR(255) NOT NULL,
-  phone VARCHAR(30) NULL,
-  is_active TINYINT(1) DEFAULT 1,
-  last_login_at DATETIME NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT fk_users_role FOREIGN KEY (role_id) REFERENCES roles(id),
-  CONSTRAINT fk_users_store FOREIGN KEY (store_id) REFERENCES stores(id)
-) ENGINE=InnoDB;
+create table public.categories (
+  id uuid primary key default gen_random_uuid(),
+  store_id uuid references public.stores(id),
+  name text not null,
+  slug text not null,
+  type text default 'product',
+  created_at timestamptz default now(),
+  unique (store_id, slug)
+);
 
-CREATE TABLE categories (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  store_id INT UNSIGNED NULL,
-  name VARCHAR(150) NOT NULL,
-  slug VARCHAR(180) NOT NULL,
-  type ENUM('product','service') DEFAULT 'product',
-  icon VARCHAR(80) NULL,
-  description TEXT NULL,
-  image VARCHAR(255) NULL,
-  is_active TINYINT(1) DEFAULT 1,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_categories_store_slug (store_id, slug),
-  CONSTRAINT fk_categories_store FOREIGN KEY (store_id) REFERENCES stores(id)
-) ENGINE=InnoDB;
+create table public.products (
+  id uuid primary key default gen_random_uuid(),
+  store_id uuid not null references public.stores(id),
+  category_id uuid references public.categories(id),
+  sku text not null,
+  barcode text,
+  name text not null,
+  description text,
+  cost_price numeric(14,2) default 0,
+  selling_price numeric(14,2) not null default 0,
+  stock integer not null default 0,
+  minimum_stock integer not null default 0,
+  image_url text,
+  is_active boolean default true,
+  created_at timestamptz default now(),
+  unique (store_id, sku)
+);
 
-CREATE TABLE products (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  store_id INT UNSIGNED NOT NULL,
-  category_id INT UNSIGNED NOT NULL,
-  sku VARCHAR(80) NOT NULL,
-  barcode VARCHAR(100) NULL,
-  name VARCHAR(180) NOT NULL,
-  description TEXT NULL,
-  unit VARCHAR(30) DEFAULT 'pcs',
-  cost_price DECIMAL(15,2) DEFAULT 0,
-  selling_price DECIMAL(15,2) NOT NULL DEFAULT 0,
-  stock INT NOT NULL DEFAULT 0,
-  minimum_stock INT NOT NULL DEFAULT 0,
-  image VARCHAR(255) NULL,
-  is_featured TINYINT(1) DEFAULT 0,
-  is_active TINYINT(1) DEFAULT 1,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_products_store_sku (store_id, sku),
-  KEY idx_products_barcode (barcode),
-  CONSTRAINT fk_products_store FOREIGN KEY (store_id) REFERENCES stores(id),
-  CONSTRAINT fk_products_category FOREIGN KEY (category_id) REFERENCES categories(id)
-) ENGINE=InnoDB;
+create table public.transactions (
+  id uuid primary key default gen_random_uuid(),
+  store_id uuid not null references public.stores(id),
+  cashier_id uuid references public.users(id),
+  invoice_number text not null unique,
+  subtotal numeric(14,2) not null default 0,
+  discount_total numeric(14,2) not null default 0,
+  tax_total numeric(14,2) not null default 0,
+  grand_total numeric(14,2) not null default 0,
+  paid_amount numeric(14,2) not null default 0,
+  change_amount numeric(14,2) not null default 0,
+  payment_method text not null default 'cash' check (payment_method in ('cash', 'transfer', 'qris')),
+  created_at timestamptz default now()
+);
 
-CREATE TABLE customers (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  store_id INT UNSIGNED NULL,
-  name VARCHAR(150) NOT NULL,
-  phone VARCHAR(30) NULL,
-  email VARCHAR(150) NULL,
-  address TEXT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT fk_customers_store FOREIGN KEY (store_id) REFERENCES stores(id)
-) ENGINE=InnoDB;
+create table public.transaction_items (
+  id uuid primary key default gen_random_uuid(),
+  transaction_id uuid not null references public.transactions(id) on delete cascade,
+  product_id uuid references public.products(id),
+  product_name text not null,
+  qty integer not null,
+  unit_price numeric(14,2) not null,
+  subtotal numeric(14,2) not null
+);
 
-CREATE TABLE transactions (
-  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  store_id INT UNSIGNED NOT NULL,
-  user_id INT UNSIGNED NOT NULL,
-  customer_id INT UNSIGNED NULL,
-  invoice_number VARCHAR(60) NOT NULL UNIQUE,
-  subtotal DECIMAL(15,2) NOT NULL DEFAULT 0,
-  discount_total DECIMAL(15,2) NOT NULL DEFAULT 0,
-  tax_total DECIMAL(15,2) NOT NULL DEFAULT 0,
-  grand_total DECIMAL(15,2) NOT NULL DEFAULT 0,
-  paid_amount DECIMAL(15,2) NOT NULL DEFAULT 0,
-  change_amount DECIMAL(15,2) NOT NULL DEFAULT 0,
-  payment_status ENUM('paid','partial','void') DEFAULT 'paid',
-  notes TEXT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_transactions_store FOREIGN KEY (store_id) REFERENCES stores(id),
-  CONSTRAINT fk_transactions_user FOREIGN KEY (user_id) REFERENCES users(id),
-  CONSTRAINT fk_transactions_customer FOREIGN KEY (customer_id) REFERENCES customers(id)
-) ENGINE=InnoDB;
+create table public.stock_movements (
+  id uuid primary key default gen_random_uuid(),
+  store_id uuid not null references public.stores(id),
+  product_id uuid not null references public.products(id),
+  user_id uuid references public.users(id),
+  type text not null check (type in ('in', 'out', 'sale', 'transfer_in', 'transfer_out', 'adjustment')),
+  qty integer not null,
+  reference_id uuid,
+  notes text,
+  created_at timestamptz default now()
+);
 
-CREATE TABLE transaction_items (
-  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  transaction_id BIGINT UNSIGNED NOT NULL,
-  product_id INT UNSIGNED NOT NULL,
-  product_name VARCHAR(180) NOT NULL,
-  qty INT NOT NULL,
-  unit_price DECIMAL(15,2) NOT NULL,
-  cost_price DECIMAL(15,2) NOT NULL DEFAULT 0,
-  discount_amount DECIMAL(15,2) NOT NULL DEFAULT 0,
-  subtotal DECIMAL(15,2) NOT NULL,
-  CONSTRAINT fk_items_transaction FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
-  CONSTRAINT fk_items_product FOREIGN KEY (product_id) REFERENCES products(id)
-) ENGINE=InnoDB;
+create table public.settings (
+  id uuid primary key default gen_random_uuid(),
+  store_id uuid references public.stores(id),
+  key text not null,
+  value jsonb,
+  created_at timestamptz default now(),
+  unique (store_id, key)
+);
 
-CREATE TABLE payments (
-  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  transaction_id BIGINT UNSIGNED NOT NULL,
-  method ENUM('cash','transfer','qris') NOT NULL,
-  amount DECIMAL(15,2) NOT NULL,
-  reference_number VARCHAR(120) NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_payments_transaction FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
+alter table public.roles enable row level security;
+alter table public.stores enable row level security;
+alter table public.users enable row level security;
+alter table public.categories enable row level security;
+alter table public.products enable row level security;
+alter table public.transactions enable row level security;
+alter table public.transaction_items enable row level security;
+alter table public.stock_movements enable row level security;
+alter table public.settings enable row level security;
 
-CREATE TABLE stock_movements (
-  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  store_id INT UNSIGNED NOT NULL,
-  product_id INT UNSIGNED NOT NULL,
-  user_id INT UNSIGNED NULL,
-  type ENUM('in','out','sale','transfer_in','transfer_out','adjustment') NOT NULL,
-  qty INT NOT NULL,
-  source_store_id INT UNSIGNED NULL,
-  destination_store_id INT UNSIGNED NULL,
-  reference_type VARCHAR(60) NULL,
-  reference_id BIGINT UNSIGNED NULL,
-  notes TEXT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_stock_store FOREIGN KEY (store_id) REFERENCES stores(id),
-  CONSTRAINT fk_stock_product FOREIGN KEY (product_id) REFERENCES products(id),
-  CONSTRAINT fk_stock_user FOREIGN KEY (user_id) REFERENCES users(id),
-  CONSTRAINT fk_stock_source_store FOREIGN KEY (source_store_id) REFERENCES stores(id),
-  CONSTRAINT fk_stock_destination_store FOREIGN KEY (destination_store_id) REFERENCES stores(id)
-) ENGINE=InnoDB;
+create or replace function public.current_profile()
+returns public.users
+language sql
+stable
+as $$
+  select * from public.users where auth_user_id = auth.uid() limit 1
+$$;
 
-CREATE TABLE services (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  store_id INT UNSIGNED NULL,
-  title VARCHAR(160) NOT NULL,
-  description TEXT NULL,
-  icon VARCHAR(80) NULL,
-  is_active TINYINT(1) DEFAULT 1,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT fk_services_store FOREIGN KEY (store_id) REFERENCES stores(id)
-) ENGINE=InnoDB;
+create policy "authenticated can read roles" on public.roles for select to authenticated using (true);
+create policy "users read own profile" on public.users for select to authenticated using (auth_user_id = auth.uid());
+create policy "store scoped users read stores" on public.stores for select to authenticated using (
+  exists (
+    select 1 from public.users u
+    join public.roles r on r.id = u.role_id
+    where u.auth_user_id = auth.uid()
+      and (r.code = 'super_admin' or u.store_id = stores.id)
+  )
+);
+create policy "store scoped products" on public.products for select to authenticated using (
+  exists (
+    select 1 from public.users u
+    join public.roles r on r.id = u.role_id
+    where u.auth_user_id = auth.uid()
+      and (r.code = 'super_admin' or u.store_id = products.store_id)
+  )
+);
+create policy "store scoped categories" on public.categories for select to authenticated using (true);
+create policy "store scoped transactions" on public.transactions for all to authenticated using (
+  exists (
+    select 1 from public.users u
+    join public.roles r on r.id = u.role_id
+    where u.auth_user_id = auth.uid()
+      and (r.code = 'super_admin' or u.store_id = transactions.store_id)
+  )
+);
+create policy "store scoped transaction items" on public.transaction_items for select to authenticated using (
+  exists (
+    select 1 from public.transactions t
+    join public.users u on u.store_id = t.store_id
+    join public.roles r on r.id = u.role_id
+    where t.id = transaction_items.transaction_id
+      and u.auth_user_id = auth.uid()
+      and (r.code = 'super_admin' or u.store_id = t.store_id)
+  )
+);
+create policy "store scoped stock movements" on public.stock_movements for all to authenticated using (
+  exists (
+    select 1 from public.users u
+    join public.roles r on r.id = u.role_id
+    where u.auth_user_id = auth.uid()
+      and (r.code = 'super_admin' or u.store_id = stock_movements.store_id)
+  )
+);
+create policy "settings read" on public.settings for select to authenticated using (true);
 
-CREATE TABLE testimonials (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  store_id INT UNSIGNED NULL,
-  name VARCHAR(150) NOT NULL,
-  business VARCHAR(150) NULL,
-  rating TINYINT UNSIGNED DEFAULT 5,
-  quote TEXT NOT NULL,
-  is_active TINYINT(1) DEFAULT 1,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_testimonials_store FOREIGN KEY (store_id) REFERENCES stores(id)
-) ENGINE=InnoDB;
-
-CREATE TABLE gallery (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  store_id INT UNSIGNED NULL,
-  title VARCHAR(160) NOT NULL,
-  category VARCHAR(120) NULL,
-  image VARCHAR(255) NOT NULL,
-  is_active TINYINT(1) DEFAULT 1,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_gallery_store FOREIGN KEY (store_id) REFERENCES stores(id)
-) ENGINE=InnoDB;
-
-CREATE TABLE faqs (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  question VARCHAR(220) NOT NULL,
-  answer TEXT NOT NULL,
-  sort_order INT DEFAULT 0,
-  is_active TINYINT(1) DEFAULT 1,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
-
-CREATE TABLE settings (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  store_id INT UNSIGNED NULL,
-  setting_key VARCHAR(120) NOT NULL,
-  setting_value TEXT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_settings_store_key (store_id, setting_key),
-  CONSTRAINT fk_settings_store FOREIGN KEY (store_id) REFERENCES stores(id)
-) ENGINE=InnoDB;
+insert into public.roles (code, name) values
+  ('super_admin', 'Super Admin'),
+  ('owner', 'Owner'),
+  ('manager', 'Manager'),
+  ('cashier', 'Cashier')
+on conflict (code) do update set name = excluded.name;

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Bali CopyTech Business System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/app.css">
+  </head>
+  <body class="admin-shell grid min-h-screen place-items-center px-4 text-white">
+    <main class="glass w-full max-w-md rounded-3xl p-8">
+      <p class="text-xs font-black uppercase tracking-[0.28em] text-cyan-200">Supabase Auth</p>
+      <h1 class="mt-3 text-3xl font-black">Masuk Sistem</h1>
+      <p class="mt-3 text-sm leading-7 text-slate-300">Login untuk dashboard admin, POS kasir, inventory, dan laporan multi toko.</p>
+      <form id="login-form" class="mt-8 space-y-4">
+        <label class="block">
+          <span class="text-sm font-bold text-slate-200">Email</span>
+          <input name="email" type="email" required class="field mt-2" placeholder="admin@example.com">
+        </label>
+        <label class="block">
+          <span class="text-sm font-bold text-slate-200">Password</span>
+          <input name="password" type="password" required class="field mt-2" placeholder="••••••••">
+        </label>
+        <p id="auth-message" class="hidden rounded-xl px-4 py-3 text-sm"></p>
+        <button class="btn-primary w-full">Login</button>
+      </form>
+      <p class="mt-6 text-xs leading-6 text-slate-500">Set Supabase URL dan anon key di <code>config/supabase.js</code>. Mode demo tetap berjalan tanpa koneksi.</p>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="login.js"></script>
+  </body>
+</html>

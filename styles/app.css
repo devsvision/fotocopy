@@ -1,0 +1,67 @@
+.section-pad {
+  padding: 5rem 1rem;
+}
+
+.hero-grid {
+  min-height: calc(100vh - 4rem);
+}
+
+.admin-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(0, 212, 255, 0.17), transparent 26rem),
+    radial-gradient(circle at 95% 0%, rgba(37, 99, 235, 0.16), transparent 30rem),
+    #020617;
+}
+
+.field {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.85rem 1rem;
+  color: white;
+  outline: none;
+}
+
+.field:focus {
+  border-color: rgba(103, 232, 249, 0.8);
+  box-shadow: 0 0 0 3px rgba(103, 232, 249, 0.14);
+}
+
+.btn-primary {
+  border-radius: 999px;
+  background: #67e8f9;
+  padding: 0.85rem 1.25rem;
+  font-weight: 900;
+  color: #020617;
+  box-shadow: 0 0 32px rgba(0, 212, 255, 0.28);
+}
+
+.btn-secondary {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.85rem 1.25rem;
+  font-weight: 800;
+  color: white;
+}
+
+.receipt {
+  display: none;
+}
+
+@media print {
+  body > :not(.receipt) {
+    display: none !important;
+  }
+
+  .receipt {
+    display: block;
+    color: #111;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.35;
+    width: 72mm;
+    padding: 8px;
+  }
+}
